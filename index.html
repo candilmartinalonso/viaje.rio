@@ -3,154 +3,188 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Guía Interactiva: Río de Janeiro 2025</title>
+    <title>Guía Definitiva: Río de Janeiro 2025</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
-    <!-- Chosen Palette: Rio Sunset (Warm neutrals like beige/sand, with terracotta and muted green accents) -->
-    <!-- Application Structure Plan: A task-oriented SPA with a main navigation for 'Inicio', 'Planifica', 'Explora', 'Saborea', 'Itinerario', 'Escapadas', 'Consejos' and 'Seguridad'. This structure groups information logically for a traveler (pre-trip planning, in-trip activities, reference), making it more intuitive and less linear than the source report. Interactions like a budget calculator, a clickable itinerary, and sortable tables are designed to facilitate quick information retrieval and comparison. -->
-    <!-- Visualization & Content Choices: Clima: Goal=Inform, Viz=Chart.js bar chart for temp range & HTML cards for key stats, Interaction=None, Justification=Visual data is more engaging. Traslados: Goal=Compare, Viz=HTML Table, Interaction=JS sorting by cost/time, Justification=Sorting adds utility. Itinerario: Goal=Organize, Viz=JS Accordion/Timeline, Interaction=Click to expand day, Justification=Prevents information overload. Presupuesto: Goal=Inform/Plan, Viz=Interactive JS calculator, Interaction=User input for days/style, Justification=Personalized planning tool. Seguridad: Goal=Inform, Viz=Two-column HTML layout with Unicode icons, Interaction=None, Justification=High scannability for critical info. Library/Method: Chart.js (Canvas), Vanilla JS, Tailwind CSS. -->
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        :root {
+            --bg-light: #F8F9FA;
+            --bg-card: #FFFFFF;
+            --text-dark: #212529;
+            --text-muted: #6C757D;
+            --accent-start: #0077B6;
+            --accent-end: #00B4D8;
+            --shadow-color: 220, 220, 220;
+        }
+
         body {
-            font-family: 'Inter', sans-serif;
-            background-color: #FDF8F2; /* Warm Beige */
-            color: #4A4A4A;
+            font-family: 'Poppins', sans-serif;
+            background-color: var(--bg-light);
+            color: var(--text-muted);
         }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
+
+        #preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: var(--bg-light);
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.5s ease-out;
         }
-        @keyframes fadeOut {
-            from { opacity: 1; transform: translateY(0); }
-            to { opacity: 0; transform: translateY(10px); }
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #e0e0e0;
+            border-top: 5px solid var(--accent-start);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
-        .section-content {
-            display: none;
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
-        .section-content.active {
-            display: block;
-            animation: fadeIn 0.5s ease-in-out forwards;
-        }
-        .section-content.fade-out {
-            animation: fadeOut 0.3s ease-in-out forwards;
-        }
-        .nav-link {
-            transition: all 0.3s ease;
-            cursor: pointer;
-        }
-        .nav-link.active {
-            color: #E57373; /* Terracotta Accent */
-            border-bottom: 2px solid #E57373;
-        }
+
         .card {
-            background-color: #FFFFFF;
-            border: 1px solid #E0E0E0;
-            border-radius: 12px;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            background-color: var(--bg-card);
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(var(--shadow-color), 0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 12px 20px rgba(0, 0, 0, 0.1);
+            transform: translateY(-12px);
+            box-shadow: 0 20px 40px rgba(var(--shadow-color), 0.7);
         }
-        .btn {
-            transition: all 0.3s ease;
-            border-radius: 8px;
-            padding: 0.5rem 1rem;
+        
+        header {
+            transition: all 0.4s ease;
         }
-        .btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        header.scrolled {
+            background-color: rgba(255, 255, 255, 0.85);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
         }
-        .btn-primary {
-            background-color: #81C784; /* Muted Green */
-            color: white;
-        }
-        .btn-primary:hover {
-            background-color: #66BB6A;
-        }
-        .btn-secondary {
-            background-color: #F0F0F0;
-            color: #4A4A4A;
-        }
-        .btn-secondary:hover {
-            background-color: #E0E0E0;
-        }
-        .chart-container {
+        
+        .nav-link {
             position: relative;
-            width: 100%;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
-            height: 300px;
-            max-height: 400px;
-        }
-        @media (min-width: 768px) {
-            .chart-container {
-                height: 350px;
-            }
-        }
-        .itinerary-day {
+            transition: color 0.3s ease;
             cursor: pointer;
-            border-left: 4px solid #E0E0E0;
-            transition: all 0.3s ease;
+            color: var(--text-muted);
         }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 3px;
+            border-radius: 2px;
+            bottom: -6px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+            transition: width 0.4s ease;
+        }
+        .nav-link.active {
+            color: var(--text-dark);
+            font-weight: 600;
+        }
+        .nav-link.active::after, .nav-link:hover::after {
+            width: 60%;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .section-content { display: none; }
+        .section-content.active {
+            display: block;
+            animation: fadeIn 0.7s ease-out forwards;
+        }
+        .scroll-animate {
+            opacity: 0;
+            transform: translateY(40px);
+            transition: opacity 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .scroll-animate.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .btn-gradient {
+            background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+            color: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 180, 216, 0.3);
+            border-radius: 12px;
+            padding: 12px 24px;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 119, 182, 0.4);
+        }
+        .text-gradient {
+            background: linear-gradient(90deg, var(--accent-start), var(--accent-end));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .weather-carousel {
+            display: flex;
+            overflow-x: auto;
+            padding-bottom: 20px;
+            scrollbar-width: thin;
+            scrollbar-color: var(--accent-start) #e9ecef;
+        }
+        .weather-carousel::-webkit-scrollbar { height: 8px; }
+        .weather-carousel::-webkit-scrollbar-track { background: #e9ecef; border-radius: 4px; }
+        .weather-carousel::-webkit-scrollbar-thumb { background-color: var(--accent-start); border-radius: 4px; }
+        .weather-carousel::-webkit-scrollbar-thumb:hover { background-color: var(--accent-end); }
+        
         .itinerary-day.active {
-            border-left-color: #E57373;
-            background-color: #FFF5F5;
+            border-left-color: var(--accent-start);
+            background-color: rgba(0, 180, 216, 0.05);
         }
         .itinerary-content {
             max-height: 0;
             overflow: hidden;
             transition: max-height 0.5s ease-out;
         }
-        .scroll-animate {
-            opacity: 0;
-            transform: translateY(30px);
-            transition: opacity 0.6s ease-out, transform 0.6s ease-out;
-        }
-        .scroll-animate.visible {
-            opacity: 1;
-            transform: translateY(0);
-        }
-        .budget-style-btn.active {
-            background-color: #E57373;
-            color: white;
-            border-color: #E57373;
-        }
     </style>
 </head>
 <body class="antialiased">
 
-    <header class="bg-white shadow-md sticky top-0 z-50">
+    <div id="preloader"><div class="loader"></div></div>
+
+    <header class="sticky top-0 z-50">
         <div class="container mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-16">
+            <div class="flex items-center justify-between h-20">
                 <div class="flex-shrink-0">
-                    <h1 class="text-2xl font-bold text-[#E57373]">Río 2025</h1>
+                    <h1 class="text-3xl font-extrabold text-gradient">Río 2025</h1>
                 </div>
                 <nav class="hidden md:block">
-                    <div id="main-nav" class="ml-10 flex items-baseline space-x-4">
-                        <a data-section="inicio" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Inicio</a>
-                        <a data-section="planifica" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Planifica</a>
-                        <a data-section="explora" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Explora</a>
-                        <a data-section="saborea" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Saborea</a>
-                        <a data-section="itinerario" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Itinerario</a>
-                        <a data-section="escapadas" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Escapadas</a>
-                        <a data-section="consejos" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Consejos</a>
-                        <a data-section="seguridad" class="nav-link px-3 py-2 rounded-md text-sm font-medium">Seguridad</a>
+                    <div id="main-nav" class="ml-10 flex items-baseline space-x-6">
+                        <a data-section="inicio" class="nav-link px-3 py-2 text-sm font-semibold">Inicio</a>
+                        <a data-section="planifica" class="nav-link px-3 py-2 text-sm font-semibold">Planifica</a>
+                        <a data-section="explora" class="nav-link px-3 py-2 text-sm font-semibold">Explora</a>
+                        <a data-section="gastronomia" class="nav-link px-3 py-2 text-sm font-semibold">Gastronomía</a>
+                        <a data-section="itinerario" class="nav-link px-3 py-2 text-sm font-semibold">Itinerario</a>
+                        <a data-section="portugues" class="nav-link px-3 py-2 text-sm font-semibold">Portugués Básico</a>
+                        <a data-section="escapadas" class="nav-link px-3 py-2 text-sm font-semibold">Escapadas</a>
+                        <a data-section="seguridad" class="nav-link px-3 py-2 text-sm font-semibold">Seguridad</a>
                     </div>
                 </nav>
                 <div class="-mr-2 flex md:hidden">
-                    <button id="mobile-menu-button" type="button" class="bg-white inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-[#E57373]" aria-controls="mobile-menu" aria-expanded="false">
-                        <span class="sr-only">Abrir menú principal</span>
-                        <div id="hamburger-icon">
-                            <div class="w-6 h-0.5 bg-gray-600 my-1"></div>
-                            <div class="w-6 h-0.5 bg-gray-600 my-1"></div>
-                            <div class="w-6 h-0.5 bg-gray-600 my-1"></div>
-                        </div>
+                    <button id="mobile-menu-button" type="button" class="bg-transparent inline-flex items-center justify-center p-2 rounded-md text-gray-500 hover:text-gray-800 focus:outline-none">
+                        <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7" />
+                        </svg>
                     </button>
                 </div>
             </div>
@@ -160,10 +194,10 @@
                 <a data-section="inicio" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Inicio</a>
                 <a data-section="planifica" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Planifica</a>
                 <a data-section="explora" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Explora</a>
-                <a data-section="saborea" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Saborea</a>
+                <a data-section="gastronomia" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Gastronomía</a>
                 <a data-section="itinerario" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Itinerario</a>
+                <a data-section="portugues" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Portugués Básico</a>
                 <a data-section="escapadas" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Escapadas</a>
-                <a data-section="consejos" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Consejos</a>
                 <a data-section="seguridad" class="nav-link block px-3 py-2 rounded-md text-base font-medium">Seguridad</a>
             </div>
         </div>
@@ -172,350 +206,196 @@
     <main class="container mx-auto p-4 sm:p-6 lg:p-8">
 
         <section id="inicio" class="section-content">
-            <div class="text-center p-8 md:p-12 bg-white rounded-xl shadow-lg scroll-animate">
-                <h2 class="text-4xl md:text-5xl font-bold text-[#E57373]">¡Bienvenido a la <em>Cidade Maravilhosa</em>!</h2>
-                <p class="mt-4 text-lg text-gray-600">Tu aventura en Río de Janeiro del <strong>25 de agosto al 4 de septiembre de 2025</strong> está por comenzar.</p>
-                <p class="mt-2 text-gray-500">Esta guía interactiva está diseñada para ser tu compañera de viaje. Navega por las secciones para planificar, explorar y disfrutar al máximo tu estadía.</p>
+            <div class="text-center py-16 md:py-24">
+                <h2 class="text-5xl md:text-7xl font-extrabold text-dark scroll-animate">Tu Aventura en la</h2>
+                <h1 class="text-6xl md:text-8xl font-extrabold text-gradient mt-2 scroll-animate" style="transition-delay: 150ms;">Cidade Maravilhosa</h1>
+                <p class="mt-6 text-lg text-muted max-w-2xl mx-auto scroll-animate" style="transition-delay: 300ms;">Tu guía definitiva para explorar Río de Janeiro del <strong>25 de agosto al 4 de septiembre de 2025</strong>. Planifica, descubre y vive una experiencia inolvidable.</p>
             </div>
-            <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="card p-6 text-center scroll-animate">
-                    <span class="text-4xl">☀️</span>
-                    <h3 class="mt-2 text-xl font-bold">Clima Ideal</h3>
-                    <p class="mt-2 text-gray-600">Disfruta de días soleados con temperaturas entre 16°C y 28°C. ¡Perfecto para explorar!</p>
+             <div class="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div class="card p-8 text-center scroll-animate" style="transition-delay: 450ms;">
+                    <span class="text-5xl">🗓️</span>
+                    <h3 class="mt-4 text-xl font-bold text-dark">Clima Detallado</h3>
+                    <p class="mt-2">Pronóstico diario con amanecer, atardecer, humedad y probabilidad de lluvia para que no te pierdas nada.</p>
                 </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 150ms;">
-                    <span class="text-4xl">🗓️</span>
-                    <h3 class="mt-2 text-xl font-bold">Itinerario Flexible</h3>
-                    <p class="mt-2 text-gray-600">Descubre un plan de 11 días lleno de actividades, desde los íconos hasta la cultura local.</p>
+                <div class="card p-8 text-center scroll-animate" style="transition-delay: 600ms;">
+                    <span class="text-5xl">🍲</span>
+                    <h3 class="mt-4 text-xl font-bold text-dark">Sabores de Río</h3>
+                    <p class="mt-2">Una nueva sección dedicada a la gastronomía local para que disfrutes de los platos más auténticos.</p>
                 </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 300ms;">
-                    <span class="text-4xl">🛡️</span>
-                    <h3 class="mt-2 text-xl font-bold">Seguridad Primero</h3>
-                    <p class="mt-2 text-gray-600">Consulta nuestros consejos clave para moverte por la ciudad con confianza y tranquilidad.</p>
+                <div class="card p-8 text-center scroll-animate" style="transition-delay: 750ms;">
+                    <span class="text-5xl">🗣️</span>
+                    <h3 class="mt-4 text-xl font-bold text-dark">Portugués Esencial</h3>
+                    <p class="mt-2">Aprende frases clave para comunicarte y sumergirte de lleno en la cultura carioca.</p>
                 </div>
             </div>
         </section>
 
         <section id="planifica" class="section-content">
             <div class="scroll-animate">
-                <h2 class="text-3xl font-bold text-center mb-8">Planifica tu Viaje</h2>
-                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Aquí encontrarás toda la información esencial para preparar tu aventura sin contratiempos, desde qué empacar hasta cómo manejar tu dinero y moverte por la ciudad.</p>
+                <h2 class="text-4xl font-bold text-center text-dark mb-4">Planifica tu Viaje</h2>
+                <p class="text-center text-muted mb-12 max-w-3xl mx-auto">Toda la información esencial para una aventura sin contratiempos, desde el clima diario hasta cómo manejar tu dinero.</p>
             </div>
             
             <div class="space-y-12">
                 <div class="card p-6 md:p-8 scroll-animate">
-                    <h3 class="text-2xl font-bold mb-4">🌦️ Clima y Maleta</h3>
+                    <h3 class="text-2xl font-bold text-dark mb-6">🌦️ Pronóstico Diario Detallado</h3>
+                    <div id="weather-forecast-container" class="weather-carousel"></div>
+                </div>
+
+                <div class="card p-6 md:p-8 scroll-animate">
+                    <h3 class="text-2xl font-bold text-dark mb-4">💰 Calculadora de Presupuesto</h3>
+                    <p class="mb-6">Estima el costo de tu viaje (sin vuelos). Selecciona tu estilo y ajusta los días. Valores por persona en USD.</p>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
                         <div>
-                            <p class="mb-4">El clima en tus fechas es casi perfecto, pero tiene sus matices. Agosto es seco y soleado, mientras que principios de septiembre puede traer alguna lluvia pasajera. Las noches son frescas, ¡no subestimes la brisa del mar!</p>
-                            <div class="grid grid-cols-2 gap-4 text-center">
-                                <div class="bg-blue-50 p-4 rounded-lg">
-                                    <p class="text-2xl font-bold text-blue-500">25-28°C</p>
-                                    <p class="text-sm">Máximas Diurnas</p>
-                                </div>
-                                <div class="bg-indigo-50 p-4 rounded-lg">
-                                    <p class="text-2xl font-bold text-indigo-500">16-19°C</p>
-                                    <p class="text-sm">Mínimas Nocturnas</p>
-                                </div>
-                                <div class="bg-cyan-50 p-4 rounded-lg">
-                                    <p class="text-2xl font-bold text-cyan-500">21-22°C</p>
-                                    <p class="text-sm">Temp. del Agua</p>
-                                </div>
-                                <div class="bg-amber-50 p-4 rounded-lg">
-                                    <p class="text-2xl font-bold text-amber-500">73%</p>
-                                    <p class="text-sm">Días Soleados</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div>
-                            <div class="chart-container">
-                                <canvas id="climateChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-6 md:p-8 scroll-animate">
-                    <h3 class="text-2xl font-bold mb-4">💰 Calculadora de Presupuesto</h3>
-                    <p class="mb-6">Estima el costo de tu viaje (excluyendo vuelos). Selecciona tu estilo de viaje y ajusta los días para obtener un aproximado. Los valores son por persona en USD.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                        <div>
-                            <label for="days-input" class="block text-sm font-medium text-gray-700">Duración del viaje (días)</label>
-                            <input type="number" id="days-input" value="11" min="1" max="30" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm">
+                            <label for="days-input" class="block text-sm font-medium text-dark">Duración del viaje (días)</label>
+                            <input type="number" id="days-input" value="11" min="1" max="30" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm">
                             <div id="budget-style-selector" class="mt-4 flex flex-wrap gap-2">
-                                <button data-style="budget" class="budget-style-btn btn btn-secondary active">Mochilero</button>
-                                <button data-style="mid" class="budget-style-btn btn btn-secondary">Moderado</button>
-                                <button data-style="luxury" class="budget-style-btn btn btn-secondary">Lujo</button>
+                                <button data-style="budget" class="budget-style-btn active">Mochilero</button>
+                                <button data-style="mid" class="budget-style-btn">Moderado</button>
+                                <button data-style="luxury" class="budget-style-btn">Lujo</button>
                             </div>
                         </div>
-                        <div class="text-center bg-green-50 p-6 rounded-lg">
+                        <div class="text-center bg-blue-50 p-6 rounded-lg">
                             <p class="text-lg text-gray-600">Costo total estimado:</p>
-                            <p id="total-budget" class="text-4xl font-bold text-green-700 mt-2">$825</p>
+                            <p id="total-budget" class="text-4xl font-bold text-blue-800 mt-2">$825</p>
                             <p id="daily-budget" class="text-sm text-gray-500 mt-1">($75 por día)</p>
                         </div>
-                    </div>
-                </div>
-
-                <div class="card p-6 md:p-8 scroll-animate">
-                    <h3 class="text-2xl font-bold mb-4">💸 Dinero y Pagos</h3>
-                    <p class="mb-6">Brasil ha modernizado sus pagos. La estrategia más eficiente es una combinación de dólares en efectivo para cambiar por Reales (R$) y el uso de billeteras virtuales para pagar con PIX, el sistema de pago instantáneo que es aceptado en todas partes.</p>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
-                        <div class="border p-4 rounded-lg">
-                            <h4 class="font-bold text-lg">💵 Dólares en Efectivo</h4>
-                            <p class="text-sm mt-1">La mejor opción para cambiar por Reales en casas de cambio locales (en Copacabana) para obtener la mejor cotización.</p>
-                        </div>
-                        <div class="border p-4 rounded-lg bg-[#E57373] text-white">
-                            <h4 class="font-bold text-lg">📱 PIX (Recomendado)</h4>
-                            <p class="text-sm mt-1">Usa apps como Belo o Global66. Fondeas en pesos y pagas escaneando QR, con un tipo de cambio mucho más favorable. ¡Necesitas internet!</p>
-                        </div>
-                        <div class="border p-4 rounded-lg">
-                            <h4 class="font-bold text-lg">💳 Tarjetas</h4>
-                            <p class="text-sm mt-1">Úsalas estratégicamente. Débito solo desde cuenta en dólares. Crédito si pagas el resumen en dólares para evitar impuestos.</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="card p-6 md:p-8 scroll-animate">
-                    <h3 class="text-2xl font-bold mb-4">✈️ Llegada y Movilidad</h3>
-                    <h4 class="text-lg font-semibold mb-2">Traslados desde el Aeropuerto (GIG)</h4>
-                    <p class="mb-4">Tu elección de traslado depende del presupuesto, comodidad y hora de llegada. Aquí tienes una comparación para ayudarte a decidir.</p>
-                    <div class="mb-4 flex space-x-2">
-                        <button class="btn btn-secondary" onclick="sortTable('transferTable', 1, 'num')">Ordenar por Costo</button>
-                        <button class="btn btn-secondary" onclick="sortTable('transferTable', 2, 'num')">Ordenar por Tiempo</button>
-                    </div>
-                    <div class="overflow-x-auto">
-                        <table id="transferTable" class="w-full text-sm text-left">
-                            <thead class="bg-gray-100">
-                                <tr>
-                                    <th class="p-3">Opción</th>
-                                    <th class="p-3">Costo (R$)</th>
-                                    <th class="p-3">Tiempo (min)</th>
-                                    <th class="p-3 hidden md:table-cell">Ideal para...</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b">
-                                    <td class="p-3 font-medium">Transfer Privado</td>
-                                    <td class="p-3">150 - 250</td>
-                                    <td class="p-3">25 - 60</td>
-                                    <td class="p-3 hidden md:table-cell">Llegadas nocturnas, familias.</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="p-3 font-medium">Uber / Apps</td>
-                                    <td class="p-3">60 - 90</td>
-                                    <td class="p-3">25 - 60</td>
-                                    <td class="p-3 hidden md:table-cell">Viajeros solos o en pareja.</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="p-3 font-medium">Taxi Prepago</td>
-                                    <td class="p-3">100 - 150</td>
-                                    <td class="p-3">25 - 60</td>
-                                    <td class="p-3 hidden md:table-cell">Evitar sorpresas en la tarifa.</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="p-3 font-medium">Autobús "Frescão"</td>
-                                    <td class="p-3">19 - 25</td>
-                                    <td class="p-3">60 - 90</td>
-                                    <td class="p-3 hidden md:table-cell">Presupuesto ajustado.</td>
-                                </tr>
-                                <tr class="border-b">
-                                    <td class="p-3 font-medium">BRT + Metro</td>
-                                    <td class="p-3">~ 11</td>
-                                    <td class="p-3">70 - 100</td>
-                                    <td class="p-3 hidden md:table-cell">Mochileros experimentados.</td>
-                                </tr>
-                            </tbody>
-                        </table>
                     </div>
                 </div>
             </div>
         </section>
 
         <section id="explora" class="section-content">
-            <div class="scroll-animate">
-                <h2 class="text-3xl font-bold text-center mb-8">Explora la Ciudad</h2>
-                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Sumérgete en el corazón de Río. Desde sus monumentos mundialmente famosos hasta la vibrante cultura de sus barrios y playas, aquí comienza tu aventura carioca.</p>
+             <div class="scroll-animate">
+                <h2 class="text-4xl font-bold text-center text-dark mb-4">Explora la Ciudad</h2>
+                <p class="text-center text-muted mb-12 max-w-3xl mx-auto">Sumérgete en el corazón de Río. Desde sus monumentos mundialmente famosos hasta la vibrante cultura de sus barrios, playas y parques.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <div class="card p-6 text-center scroll-animate">
-                    <span class="text-4xl">⛰️</span>
-                    <h3 class="mt-2 text-xl font-bold">Cristo Redentor</h3>
-                    <p class="mt-2 text-gray-600">Sube al Corcovado en tren o van para una vista inolvidable. Compra tickets online y ve temprano.</p>
-                </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 100ms;">
-                    <span class="text-4xl">🚠</span>
-                    <h3 class="mt-2 text-xl font-bold">Pan de Azúcar</h3>
-                    <p class="mt-2 text-gray-600">Disfruta del atardecer más mágico de Río desde la cima. El ascenso en teleférico es una experiencia en sí misma.</p>
-                </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 200ms;">
-                    <span class="text-4xl">🎨</span>
-                    <h3 class="mt-2 text-xl font-bold">Escalera Selarón</h3>
-                    <p class="mt-2 text-gray-600">Un mosaico de colores vibrantes que conecta Lapa y Santa Teresa. Un homenaje al pueblo brasileño.</p>
-                </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 300ms;">
-                    <span class="text-4xl">⚽</span>
-                    <h3 class="mt-2 text-xl font-bold">Maracaná</h3>
-                    <p class="mt-2 text-gray-600">Visita el templo del fútbol y siente la historia de leyendas como Pelé y Garrincha.</p>
-                </div>
-                <div class="card p-6 text-center scroll-animate">
-                    <span class="text-4xl">🎶</span>
-                    <h3 class="mt-2 text-xl font-bold">Noches en Lapa</h3>
-                    <p class="mt-2 text-gray-600">El epicentro de la samba y la bohemia. Disfruta de música en vivo en locales icónicos como Rio Scenarium.</p>
-                </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 100ms;">
-                    <span class="text-4xl">🥁</span>
-                    <h3 class="mt-2 text-xl font-bold">Ensayos de Samba</h3>
-                    <p class="mt-2 text-gray-600">Siente la energía del carnaval fuera de temporada asistiendo a un ensayo de una *escola de samba*.</p>
-                </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 200ms;">
-                    <span class="text-4xl">🌅</span>
-                    <h3 class="mt-2 text-xl font-bold">Playas y Atardeceres</h3>
-                    <p class="mt-2 text-gray-600">Vive la cultura de playa en Copacabana e Ipanema, y no te pierdas el aplauso al sol en Arpoador.</p>
-                </div>
-                <div class="card p-6 text-center scroll-animate" style="transition-delay: 300ms;">
-                    <span class="text-4xl">🏘️</span>
-                    <h3 class="mt-2 text-xl font-bold">Tour por Favela</h3>
-                    <p class="mt-2 text-gray-600">Una mirada respetuosa a la vida comunitaria con un guía local para una experiencia auténtica y segura.</p>
-                </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="card p-6 text-center scroll-animate"><span class="text-5xl">⛰️</span><h3 class="mt-2 text-xl font-bold text-dark">Cristo Redentor</h3></div>
+                <div class="card p-6 text-center scroll-animate" style="transition-delay: 100ms;"><span class="text-5xl">🚠</span><h3 class="mt-2 text-xl font-bold text-dark">Pan de Azúcar</h3></div>
+                <div class="card p-6 text-center scroll-animate" style="transition-delay: 200ms;"><span class="text-5xl">🎨</span><h3 class="mt-2 text-xl font-bold text-dark">Escalera Selarón</h3></div>
+                <div class="card p-6 text-center scroll-animate" style="transition-delay: 300ms;"><span class="text-5xl">⚽</span><h3 class="mt-2 text-xl font-bold text-dark">Maracaná</h3></div>
+                <div class="card p-6 text-center scroll-animate"><span class="text-5xl">🏛️</span><h3 class="mt-2 text-xl font-bold text-dark">Museo del Mañana</h3></div>
+                <div class="card p-6 text-center scroll-animate" style="transition-delay: 100ms;"><span class="text-5xl">🌿</span><h3 class="mt-2 text-xl font-bold text-dark">Jardín Botánico</h3></div>
+                <div class="card p-6 text-center scroll-animate" style="transition-delay: 200ms;"><span class="text-5xl">🖼️</span><h3 class="mt-2 text-xl font-bold text-dark">Parque Lage</h3></div>
+                <div class="card p-6 text-center scroll-animate" style="transition-delay: 300ms;"><span class="text-5xl">🪂</span><h3 class="mt-2 text-xl font-bold text-dark">Vuelo en Ala Delta</h3></div>
             </div>
         </section>
-
-        <section id="saborea" class="section-content">
+        
+        <section id="gastronomia" class="section-content">
             <div class="scroll-animate">
-                <h2 class="text-3xl font-bold text-center mb-8">Saborea Río</h2>
-                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">La gastronomía de Río es una fiesta de sabores. Desde el plato nacional, la feijoada, hasta el festín de carnes en una churrascaría y la refrescante caipirinha en la playa.</p>
+                <h2 class="text-4xl font-bold text-center text-dark mb-4">Sabores de Río</h2>
+                <p class="text-center text-muted mb-12 max-w-3xl mx-auto">La gastronomía carioca es una fiesta de sabores intensos y variados. No te vayas sin probar estos platos esenciales.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 <div class="card p-6 scroll-animate">
-                    <h3 class="font-bold text-xl mb-2">🍛 Platos Imperdibles</h3>
-                    <ul class="list-disc list-inside space-y-1">
-                        <li><strong>Feijoada:</strong> Guiso de frijoles negros y cerdo. ¡El plato nacional!</li>
-                        <li><strong>Moqueca:</strong> Guiso de pescado o mariscos con leche de coco y dendê.</li>
-                        <li><strong>Pão de Queijo:</strong> Panecillos de queso adictivos.</li>
-                        <li><strong>Açaí na Tigela:</strong> Bowl energético y refrescante.</li>
-                    </ul>
+                    <h3 class="font-bold text-xl text-dark mb-2">🍛 Feijoada</h3>
+                    <p>El plato nacional de Brasil. Un potente guiso de frijoles negros con varios tipos de carne de cerdo, servido con arroz, farofa (harina de yuca tostada), col rizada y naranja.</p>
                 </div>
                 <div class="card p-6 scroll-animate" style="transition-delay: 150ms;">
-                    <h3 class="font-bold text-xl mb-2">🥩 Churrascarías (Rodízio)</h3>
-                    <p>Una experiencia carnívora. Paga un precio fijo y disfruta de cortes ilimitados servidos en tu mesa.</p>
-                    <ul class="list-disc list-inside space-y-1 mt-2">
-                        <li><strong>Gama Alta:</strong> Fogo de Chão, Churrascaria Palace.</li>
-                        <li><strong>Calidad-Precio:</strong> Carretão.</li>
-                    </ul>
+                    <h3 class="font-bold text-xl text-dark mb-2">🍤 Moqueca</h3>
+                    <p>Un guiso de pescado y/o mariscos cocido lentamente en leche de coco, aceite de dendê, pimientos y cilantro. Es cremoso, aromático y delicioso.</p>
                 </div>
                 <div class="card p-6 scroll-animate" style="transition-delay: 300ms;">
-                    <h3 class="font-bold text-xl mb-2">🍹 Bebidas Típicas</h3>
-                    <ul class="list-disc list-inside space-y-1">
-                        <li><strong>Caipirinha:</strong> El cóctel nacional con cachaça, lima y azúcar.</li>
-                        <li><strong>Chopp:</strong> Cerveza de barril servida extremadamente fría.</li>
-                        <li><strong>Água de Coco:</strong> Directamente del coco, ideal para la playa.</li>
-                        <li><strong>Guaraná:</strong> La gaseosa local por excelencia.</li>
-                    </ul>
+                    <h3 class="font-bold text-xl text-dark mb-2">🧀 Pão de Queijo</h3>
+                    <p>Adorados panecillos de queso hechos con harina de yuca. Son esponjosos, ligeramente elásticos por dentro y perfectos para cualquier momento del día.</p>
+                </div>
+                <div class="card p-6 scroll-animate">
+                    <h3 class="font-bold text-xl text-dark mb-2">🥤 Açaí na Tigela</h3>
+                    <p>Un superalimento amazónico servido como un batido espeso y helado en un tazón, generalmente cubierto con granola, plátano y otras frutas.</p>
+                </div>
+                <div class="card p-6 scroll-animate" style="transition-delay: 150ms;">
+                    <h3 class="font-bold text-xl text-dark mb-2">🥟 Pastel & Coxinha</h3>
+                    <p>Comida callejera por excelencia. El Pastel es una empanada frita y crujiente rellena de queso, carne o camarones. La Coxinha es una croqueta de pollo desmenuzado con forma de muslo.</p>
+                </div>
+                <div class="card p-6 scroll-animate" style="transition-delay: 300ms;">
+                    <h3 class="font-bold text-xl text-dark mb-2">🍹 Caipirinha</h3>
+                    <p>El cóctel nacional. Hecho con cachaça (destilado de caña de azúcar), lima fresca, azúcar y hielo. Refrescante y potente, ideal para la playa.</p>
                 </div>
             </div>
         </section>
 
         <section id="itinerario" class="section-content">
             <div class="scroll-animate">
-                <h2 class="text-3xl font-bold text-center mb-8">Itinerario Sugerido (11 Días)</h2>
-                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Este es un plan flexible diseñado para optimizar tu tiempo. Si un día amanece nublado, ¡intercambia el plan de miradores por el de museos! Haz clic en cada día para ver los detalles.</p>
+                <h2 class="text-4xl font-bold text-center text-dark mb-4">Itinerario Sugerido</h2>
+                <p class="text-center text-muted mb-12 max-w-3xl mx-auto">Un plan flexible para 11 días. Si el pronóstico indica lluvia, cambia un día de playa por uno de museos. ¡Haz clic para ver los detalles!</p>
             </div>
-            <div id="itinerary-container" class="space-y-2 scroll-animate">
+            <div id="itinerary-container" class="space-y-3 scroll-animate"></div>
+        </section>
+
+        <section id="portugues" class="section-content">
+            <div class="scroll-animate">
+                <h2 class="text-4xl font-bold text-center text-dark mb-4">Portugués para Viajeros</h2>
+                <p class="text-center text-muted mb-12 max-w-3xl mx-auto">Con estas frases básicas podrás moverte con más confianza y conectar mejor con la gente local.</p>
+            </div>
+            <div class="card p-6 md:p-8 scroll-animate">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <div>
+                        <h4 class="font-bold text-lg text-dark mb-3">Saludos</h4>
+                        <p><strong>Hola:</strong> Olá / Oi</p>
+                        <p><strong>Buen día:</strong> Bom dia</p>
+                        <p><strong>Buenas tardes:</strong> Boa tarde</p>
+                        <p><strong>Buenas noches:</strong> Boa noite</p>
+                        <p><strong>Adiós:</strong> Tchau / Adeus</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-dark mb-3">Frases Comunes</h4>
+                        <p><strong>Por favor:</strong> Por favor</p>
+                        <p><strong>Gracias:</strong> Obrigado (si eres hombre) / Obrigada (si eres mujer)</p>
+                        <p><strong>De nada:</strong> De nada</p>
+                        <p><strong>¿Todo bien?:</strong> Tudo bem?</p>
+                        <p><strong>Sí / No:</strong> Sim / Não</p>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-lg text-dark mb-3">En el Restaurante</h4>
+                        <p><strong>La cuenta, por favor:</strong> A conta, por favor</p>
+                        <p><strong>Quisiera...:</strong> Eu queria...</p>
+                        <p><strong>¿Cuánto cuesta?:</strong> Quanto custa?</p>
+                        <p><strong>Agua / Cerveza:</strong> Água / Cerveja</p>
+                        <p><strong>Delicioso:</strong> Delicioso / Gostoso</p>
+                    </div>
+                </div>
             </div>
         </section>
 
         <section id="escapadas" class="section-content">
             <div class="scroll-animate">
-                <h2 class="text-3xl font-bold text-center mb-8">Escapadas desde Río</h2>
-                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Si tienes tiempo, los alrededores de Río esconden paraísos naturales. Para una estadía de 11 días, una excursión de un día es perfectamente viable.</p>
+                <h2 class="text-4xl font-bold text-center text-dark mb-4">Escapadas desde Río</h2>
+                <p class="text-center text-muted mb-12 max-w-3xl mx-auto">Los alrededores de Río esconden paraísos naturales e históricos. Una excursión de un día es perfectamente viable en tu estadía.</p>
             </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="card p-6 flex flex-col scroll-animate">
-                    <h3 class="font-bold text-xl mb-2">Arraial do Cabo</h3>
-                    <p class="text-gray-600 flex-grow">Conocido como el "Caribe Brasileño" por sus aguas turquesas y arena blanca. La mejor forma de visitarlo es con un tour de día completo.</p>
-                    <span class="mt-4 font-bold text-[#81C784]">Ideal para excursión de 1 día</span>
-                </div>
-                <div class="card p-6 flex flex-col scroll-animate" style="transition-delay: 150ms;">
-                    <h3 class="font-bold text-xl mb-2">Búzios</h3>
-                    <p class="text-gray-600 flex-grow">Un balneario sofisticado con más de 20 playas, boutiques y una vibrante vida nocturna en la Rua das Pedras.</p>
-                    <span class="mt-4 font-bold text-amber-600">Recomendado: 2 días / 1 noche</span>
-                </div>
-                <div class="card p-6 flex flex-col scroll-animate" style="transition-delay: 300ms;">
-                    <h3 class="font-bold text-xl mb-2">Ilha Grande</h3>
-                    <p class="text-gray-600 flex-grow">Un paraíso de ecoturismo con selva, playas vírgenes y sin coches. Ideal para senderismo y snorkel.</p>
-                    <span class="mt-4 font-bold text-red-600">Requiere mínimo 2 noches</span>
-                </div>
-            </div>
-        </section>
-        
-        <section id="consejos" class="section-content">
-            <div class="scroll-animate">
-                <h2 class="text-3xl font-bold text-center mb-8">Consejos Prácticos</h2>
-                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Pequeños detalles que marcan una gran diferencia. Aquí tienes algunos consejos para que tu viaje sea aún más fluido y disfrutable.</p>
-            </div>
-            <div class="space-y-8">
-                <div class="card p-6 md:p-8 scroll-animate">
-                    <h3 class="text-2xl font-bold mb-4">📱 Conectividad y Apps Útiles</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        <div>
-                            <h4 class="font-bold text-lg mb-2">Mantente Conectado</h4>
-                            <p>Tener internet desde que aterrizas es clave, especialmente para usar PIX y apps de transporte. Considera estas opciones:</p>
-                            <ul class="list-disc list-inside mt-2 space-y-1">
-                                <li><strong>eSIM (Recomendado):</strong> Compra un plan de datos antes de viajar con apps como Airalo o Holafly. Se activa al llegar y es muy conveniente.</li>
-                                <li><strong>Chip Local:</strong> Puedes comprar un chip prepago de operadores como TIM, Claro o Vivo en el aeropuerto o en tiendas de la ciudad.</li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h4 class="font-bold text-lg mb-2">Apps Imprescindibles</h4>
-                             <ul class="list-disc list-inside mt-2 space-y-1">
-                                <li><strong>Google Maps:</strong> Para navegar a pie y en transporte público.</li>
-                                <li><strong>Uber / 99:</strong> Alternativas para transporte privado.</li>
-                                <li><strong>Belo / Global66:</strong> Para pagos con PIX.</li>
-                                <li><strong>Google Translate:</strong> Para comunicarte y traducir menús.</li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="card p-6 md:p-8 scroll-animate">
-                    <h3 class="text-2xl font-bold mb-4">🤝 Etiqueta y Costumbres Locales</h3>
-                    <p class="mb-4">Entender la cultura local enriquecerá tu experiencia y te ayudará a conectar con la gente.</p>
-                    <ul class="list-disc list-inside space-y-2 text-gray-700">
-                        <li><strong>Saludos:</strong> Un "Bom dia" (buen día), "Boa tarde" (buenas tardes) o "Boa noite" (buenas noches) al entrar a una tienda o restaurante es siempre bien recibido.</li>
-                        <li><strong>Propinas:</strong> El servicio (10%) generalmente ya viene incluido en la cuenta de los restaurantes ("taxa de serviço"). No es obligatorio dejar propina adicional, pero es un gesto apreciado si el servicio fue excelente.</li>
-                        <li><strong>Ritmo de Vida:</strong> La vida en Río tiene un ritmo más relajado. No te sorprendas si el servicio en algunos lugares es más lento de lo que esperas. ¡Relájate y disfruta del momento!</li>
-                        <li><strong>En la Playa:</strong> Es común y aceptado aplaudir la puesta de sol en Arpoador como una celebración comunitaria.</li>
-                    </ul>
-                </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <div class="card p-6 flex flex-col scroll-animate"><h3 class="font-bold text-xl mb-2 text-dark">Arraial do Cabo</h3><p class="flex-grow">El "Caribe Brasileño". Aguas turquesas y arena blanca. Ideal para un tour de día completo.</p><span class="mt-4 font-bold text-green-500">Excursión de 1 día</span></div>
+                <div class="card p-6 flex flex-col scroll-animate" style="transition-delay: 150ms;"><h3 class="font-bold text-xl mb-2 text-dark">Búzios</h3><p class="flex-grow">Balneario sofisticado con más de 20 playas, boutiques y vida nocturna en la Rua das Pedras.</p><span class="mt-4 font-bold text-yellow-500">Recomendado: 2 días</span></div>
+                <div class="card p-6 flex flex-col scroll-animate" style="transition-delay: 300ms;"><h3 class="font-bold text-xl mb-2 text-dark">Petrópolis</h3><p class="flex-grow">La "Ciudad Imperial". Escapa a la sierra para ver palacios, museos y arquitectura europea.</p><span class="mt-4 font-bold text-green-500">Excursión de 1 día</span></div>
+                <div class="card p-6 flex flex-col scroll-animate" style="transition-delay: 450ms;"><h3 class="font-bold text-xl mb-2 text-dark">Ilha Grande</h3><p class="flex-grow">Paraíso de ecoturismo con selva, playas vírgenes y sin coches. Ideal para senderismo y snorkel.</p><span class="mt-4 font-bold text-red-500">Requiere 2+ noches</span></div>
             </div>
         </section>
 
         <section id="seguridad" class="section-content">
             <div class="scroll-animate">
-                <h2 class="text-3xl font-bold text-center mb-8">Guía de Seguridad y Bienestar</h2>
-                <p class="text-center text-gray-600 mb-8 max-w-3xl mx-auto">Disfrutar de Río implica ser consciente y precavido. Adopta estos hábitos para una experiencia segura y sin preocupaciones.</p>
+                <h2 class="text-4xl font-bold text-center text-dark mb-4">Seguridad y Bienestar</h2>
+                <p class="text-center text-muted mb-12 max-w-3xl mx-auto">Disfrutar de Río implica ser consciente y precavido. Adopta estos hábitos para una experiencia segura y sin preocupaciones.</p>
             </div>
             <div class="card p-6 md:p-8 scroll-animate">
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    <div class="bg-green-50 p-6 rounded-lg">
-                        <h3 class="text-2xl font-bold text-green-700 mb-4">✅ HACER</h3>
-                        <ul class="space-y-3">
-                            <li class="flex items-start"><span class="mr-3 text-green-700">✔️</span><span>Usar Uber/taxi para todos los desplazamientos nocturnos.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-green-700">✔️</span><span>Dejar objetos de valor y pasaporte en la caja fuerte del hotel.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-green-700">✔️</span><span>Llevar copia de ID y solo el dinero necesario para el día.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-green-700">✔️</span><span>Consultar el móvil dentro de un comercio, nunca caminando.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-green-700">✔️</span><span>Mantener el bolso siempre a la vista y hacia el frente.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-green-700">✔️</span><span>En caso de asalto, cooperar y no resistirse.</span></li>
+                    <div class="bg-green-50 p-6 rounded-lg border border-green-200">
+                        <h3 class="text-2xl font-bold text-green-800 mb-4">✅ HACER</h3>
+                        <ul class="space-y-3 text-green-900">
+                            <li class="flex items-start"><span class="mr-3">✔️</span><span>Usar Uber/taxi para desplazamientos nocturnos.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✔️</span><span>Dejar pasaporte y valores en la caja fuerte del hotel.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✔️</span><span>Llevar copia de ID y solo el dinero necesario para el día.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✔️</span><span>Consultar el móvil dentro de un comercio, no en la calle.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✔️</span><span>En caso de asalto, cooperar y no resistirse.</span></li>
                         </ul>
                     </div>
-                    <div class="bg-red-50 p-6 rounded-lg">
-                        <h3 class="text-2xl font-bold text-red-700 mb-4">❌ NO HACER</h3>
-                        <ul class="space-y-3">
-                            <li class="flex items-start"><span class="mr-3 text-red-700">✖️</span><span>No caminar por calles oscuras o vacías de noche.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-red-700">✖️</span><span>No exhibir joyas, relojes caros o cámaras en público.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-red-700">✖️</span><span>No llevar grandes sumas de dinero en efectivo.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-red-700">✖️</span><span>No caminar distraído con el teléfono en la mano.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-red-700">✖️</span><span>No dejar pertenencias desatendidas en la playa o bares.</span></li>
-                            <li class="flex items-start"><span class="mr-3 text-red-700">✖️</span><span>No aventurarse en favelas sin un guía local acreditado.</span></li>
+                    <div class="bg-red-50 p-6 rounded-lg border border-red-200">
+                        <h3 class="text-2xl font-bold text-red-800 mb-4">❌ NO HACER</h3>
+                        <ul class="space-y-3 text-red-900">
+                            <li class="flex items-start"><span class="mr-3">✖️</span><span>No caminar por calles oscuras o vacías de noche.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✖️</span><span>No exhibir joyas, relojes caros o cámaras en público.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✖️</span><span>No caminar distraído con el teléfono en la mano.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✖️</span><span>No dejar pertenencias desatendidas en la playa o bares.</span></li>
+                            <li class="flex items-start"><span class="mr-3">✖️</span><span>No aventurarse en favelas sin un guía local acreditado.</span></li>
                         </ul>
                     </div>
                 </div>
@@ -525,10 +405,50 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const sections = document.querySelectorAll('.section-content');
-            const navLinks = document.querySelectorAll('.nav-link');
-            const mobileMenuButton = document.getElementById('mobile-menu-button');
-            const mobileMenu = document.getElementById('mobile-menu');
+            const preloader = document.getElementById('preloader');
+            window.addEventListener('load', () => {
+                preloader.style.opacity = '0';
+                setTimeout(() => { preloader.style.display = 'none'; }, 500);
+            });
+            
+            const header = document.querySelector('header');
+            window.addEventListener('scroll', () => {
+                header.classList.toggle('scrolled', window.scrollY > 50);
+            });
+
+            const weatherData = [
+                { date: "Lunes 25", icon: "🌥️", tempMax: 24, tempMin: 21, humidity: 84, rain: 5, sunrise: "06:16", sunset: "17:41" },
+                { date: "Martes 26", icon: "🌥️", tempMax: 24, tempMin: 19, humidity: 83, rain: 10, sunrise: "06:15", sunset: "17:41" },
+                { date: "Miércoles 27", icon: "🌦️", tempMax: 24, tempMin: 19, humidity: 80, rain: 25, sunrise: "06:14", sunset: "17:42" },
+                { date: "Jueves 28", icon: "🌧️", tempMax: 23, tempMin: 19, humidity: 82, rain: 25, sunrise: "06:13", sunset: "17:42" },
+                { date: "Viernes 29", icon: "🌧️", tempMax: 23, tempMin: 19, humidity: 81, rain: 35, sunrise: "06:12", sunset: "17:43" },
+                { date: "Sábado 30", icon: "🌤️", tempMax: 24, tempMin: 19, humidity: 77, rain: 25, sunrise: "06:11", sunset: "17:43" },
+                { date: "Domingo 31", icon: "☀️", tempMax: 24, tempMin: 19, humidity: 75, rain: 0, sunrise: "06:10", sunset: "17:44" },
+                { date: "Lunes 01", icon: "☀️", tempMax: 25, tempMin: 19, humidity: 73, rain: 10, sunrise: "06:09", sunset: "17:44" },
+                { date: "Martes 02", icon: "☀️", tempMax: 27, tempMin: 18, humidity: 70, rain: 5, sunrise: "06:08", sunset: "17:45" },
+                { date: "Miércoles 03", icon: "🌤️", tempMax: 28, tempMin: 18, humidity: 68, rain: 5, sunrise: "06:07", sunset: "17:45" },
+                { date: "Jueves 04", icon: "🌤️", tempMax: 28, tempMin: 18, humidity: 72, rain: 10, sunrise: "06:06", sunset: "17:46" }
+            ];
+
+            const weatherContainer = document.getElementById('weather-forecast-container');
+            if (weatherContainer) {
+                weatherData.forEach(day => {
+                    const card = document.createElement('div');
+                    card.className = 'card p-4 text-center shrink-0 w-[150px] mr-4';
+                    card.innerHTML = `
+                        <p class="font-bold text-dark">${day.date}</p>
+                        <p class="text-5xl my-2">${day.icon}</p>
+                        <p class="text-xl font-semibold text-dark">${day.tempMax}°<span class="text-muted">/${day.tempMin}°</span></p>
+                        <div class="text-xs mt-2 space-y-1 text-left">
+                            <p>💧 ${day.humidity}% Humedad</p>
+                            <p>☔ ${day.rain}% Lluvia</p>
+                            <p>☀️ ${day.sunrise}</p>
+                            <p>🌙 ${day.sunset}</p>
+                        </div>
+                    `;
+                    weatherContainer.appendChild(card);
+                });
+            }
 
             const itineraryData = [
                 { day: 1, date: "Lunes, 25/08", title: "Llegada y Primera Inmersión", content: "Llegada al aeropuerto, traslado y check-in. Primer paseo por la rambla de Copacabana. Cena de bienvenida en un boteco tradicional." },
@@ -545,126 +465,77 @@
             ];
 
             const itineraryContainer = document.getElementById('itinerary-container');
-            itineraryData.forEach(item => {
-                const dayElement = document.createElement('div');
-                dayElement.innerHTML = `
-                    <div class="itinerary-day p-4" data-day="${item.day}">
-                        <div class="flex justify-between items-center">
-                            <div class="flex items-center">
-                                <span class="text-xl font-bold text-gray-400 mr-4">Día ${item.day}</span>
-                                <div>
-                                    <h4 class="font-bold">${item.title}</h4>
-                                    <p class="text-sm text-gray-500">${item.date}</p>
+            if (itineraryContainer) {
+                itineraryData.forEach(item => {
+                    const dayElement = document.createElement('div');
+                    dayElement.className = 'card overflow-hidden';
+                    dayElement.innerHTML = `
+                        <div class="itinerary-day p-5 cursor-pointer border-l-4 border-transparent transition-all duration-300" data-day="${item.day}">
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center">
+                                    <span class="text-2xl font-bold text-gray-300 mr-5">Día ${item.day}</span>
+                                    <div>
+                                        <h4 class="font-bold text-dark text-lg">${item.title}</h4>
+                                        <p class="text-sm text-muted">${item.date}</p>
+                                    </div>
                                 </div>
+                                <span class="text-3xl text-gray-400 transform transition-transform duration-300">+</span>
                             </div>
-                            <span class="text-2xl text-gray-400 transform transition-transform duration-300">+</span>
                         </div>
-                    </div>
-                    <div class="itinerary-content px-4 pb-4">
-                        <p class="text-gray-700 pt-2 border-t">${item.content}</p>
-                    </div>
-                `;
-                itineraryContainer.appendChild(dayElement);
-            });
-
-            itineraryContainer.addEventListener('click', function(e) {
-                const dayHeader = e.target.closest('.itinerary-day');
-                if (!dayHeader) return;
-
-                const dayWrapper = dayHeader.parentElement;
-                const content = dayWrapper.querySelector('.itinerary-content');
-                const icon = dayHeader.querySelector('span:last-child');
-
-                if (dayHeader.classList.contains('active')) {
-                    dayHeader.classList.remove('active');
-                    content.style.maxHeight = '0';
-                    icon.style.transform = 'rotate(0deg)';
-                } else {
-                    document.querySelectorAll('.itinerary-day.active').forEach(activeDay => {
-                        activeDay.classList.remove('active');
-                        activeDay.parentElement.querySelector('.itinerary-content').style.maxHeight = '0';
-                        activeDay.querySelector('span:last-child').style.transform = 'rotate(0deg)';
-                    });
-                    dayHeader.classList.add('active');
-                    content.style.maxHeight = content.scrollHeight + 'px';
-                    icon.style.transform = 'rotate(45deg)';
-                }
-            });
-
-            let currentSection = null;
-            function showSection(sectionId) {
-                const newSection = document.getElementById(sectionId);
-                if (newSection === currentSection) return;
-
-                if (currentSection) {
-                    currentSection.classList.add('fade-out');
-                    setTimeout(() => {
-                        currentSection.classList.remove('active', 'fade-out');
-                        currentSection = newSection;
-                        currentSection.classList.add('active');
-                        triggerScrollAnimations(currentSection);
-                    }, 300);
-                } else {
-                    currentSection = newSection;
-                    currentSection.classList.add('active');
-                    triggerScrollAnimations(currentSection);
-                }
-
-                navLinks.forEach(link => {
-                    link.classList.toggle('active', link.dataset.section === sectionId);
+                        <div class="itinerary-content px-5">
+                            <p class="text-muted pt-4 pb-5 border-t">${item.content}</p>
+                        </div>
+                    `;
+                    itineraryContainer.appendChild(dayElement);
                 });
-                
-                mobileMenu.classList.add('hidden');
             }
 
-            document.getElementById('main-nav').addEventListener('click', (e) => {
-                if (e.target.tagName === 'A') {
-                    showSection(e.target.dataset.section);
-                }
-            });
-            
-            document.getElementById('mobile-nav').addEventListener('click', (e) => {
-                if (e.target.tagName === 'A') {
-                    showSection(e.target.dataset.section);
-                }
-            });
+            if (itineraryContainer) {
+                itineraryContainer.addEventListener('click', function(e) {
+                    const dayHeader = e.target.closest('.itinerary-day');
+                    if (!dayHeader) return;
+                    const content = dayHeader.nextElementSibling;
+                    const icon = dayHeader.querySelector('span:last-child');
+                    const isActive = dayHeader.classList.contains('active');
 
-            mobileMenuButton.addEventListener('click', () => {
-                mobileMenu.classList.toggle('hidden');
-            });
+                    document.querySelectorAll('.itinerary-day.active').forEach(activeDay => {
+                        activeDay.classList.remove('active');
+                        activeDay.nextElementSibling.style.maxHeight = '0';
+                        activeDay.querySelector('span:last-child').style.transform = 'rotate(0deg)';
+                    });
 
-            const ctx = document.getElementById('climateChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: ['Temperatura'],
-                    datasets: [{
-                        label: 'Mínima (°C)',
-                        data: [16],
-                        backgroundColor: 'rgba(99, 102, 241, 0.7)',
-                        borderColor: 'rgba(99, 102, 241, 1)',
-                        borderWidth: 1
-                    }, {
-                        label: 'Máxima (°C)',
-                        data: [28],
-                        backgroundColor: 'rgba(239, 68, 68, 0.7)',
-                        borderColor: 'rgba(239, 68, 68, 1)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: { y: { beginAtZero: true, title: { display: true, text: 'Temperatura en °C' } } },
-                    plugins: {
-                        title: { display: true, text: 'Rango de Temperatura Típico (Ago-Sep)' },
-                        tooltip: { callbacks: { label: function(context) { return `${context.dataset.label}: ${context.raw}°C`; } } }
+                    if (!isActive) {
+                        dayHeader.classList.add('active');
+                        content.style.maxHeight = content.scrollHeight + 'px';
+                        icon.style.transform = 'rotate(45deg)';
                     }
-                }
-            });
+                });
+            }
+
+            const sections = document.querySelectorAll('.section-content');
+            const navLinks = document.querySelectorAll('.nav-link');
+            const mobileMenuButton = document.getElementById('mobile-menu-button');
+            const mobileMenu = document.getElementById('mobile-menu');
+            let currentSection = null;
+
+            function showSection(sectionId) {
+                const newSection = document.getElementById(sectionId);
+                if (!newSection) return;
+                if (newSection === currentSection) return;
+                if (currentSection) currentSection.classList.remove('active');
+                currentSection = newSection;
+                currentSection.classList.add('active');
+                triggerScrollAnimations(currentSection);
+                navLinks.forEach(link => link.classList.toggle('active', link.dataset.section === sectionId));
+                if (mobileMenu) mobileMenu.classList.add('hidden');
+            }
+
+            document.getElementById('main-nav')?.addEventListener('click', (e) => { if (e.target.tagName === 'A') showSection(e.target.dataset.section); });
+            document.getElementById('mobile-nav')?.addEventListener('click', (e) => { if (e.target.tagName === 'A') showSection(e.target.dataset.section); });
+            mobileMenuButton?.addEventListener('click', () => mobileMenu?.classList.toggle('hidden'));
 
             const scrollObserver = new IntersectionObserver((entries, observer) => {
-                entries.forEach(entry => {
+                entries.forEach((entry) => {
                     if (entry.isIntersecting) {
                         entry.target.classList.add('visible');
                         observer.unobserve(entry.target);
@@ -674,7 +545,8 @@
 
             function triggerScrollAnimations(container) {
                 const elementsToAnimate = container.querySelectorAll('.scroll-animate');
-                elementsToAnimate.forEach(el => {
+                elementsToAnimate.forEach((el, index) => {
+                    el.style.transitionDelay = `${index * 100}ms`;
                     scrollObserver.observe(el);
                 });
             }
@@ -686,58 +558,48 @@
             const styleSelector = document.getElementById('budget-style-selector');
             const totalBudgetElement = document.getElementById('total-budget');
             const dailyBudgetElement = document.getElementById('daily-budget');
-            const styleButtons = styleSelector.querySelectorAll('.budget-style-btn');
-
+            const styleButtons = styleSelector?.querySelectorAll('.budget-style-btn');
             const dailyCosts = { budget: 75, mid: 150, luxury: 300 };
             let currentStyle = 'budget';
 
             function calculateBudget() {
+                if (!daysInput || !totalBudgetElement || !dailyBudgetElement) return;
                 const days = parseInt(daysInput.value) || 0;
                 const dailyCost = dailyCosts[currentStyle];
-                const totalCost = days * dailyCost;
-                totalBudgetElement.textContent = `$${totalCost.toLocaleString()}`;
+                totalBudgetElement.textContent = `$${(days * dailyCost).toLocaleString()}`;
                 dailyBudgetElement.textContent = `($${dailyCost.toLocaleString()} por día)`;
             }
-
-            daysInput.addEventListener('input', calculateBudget);
-
-            styleSelector.addEventListener('click', (e) => {
-                if (e.target.tagName === 'BUTTON') {
-                    currentStyle = e.target.dataset.style;
-                    styleButtons.forEach(btn => btn.classList.remove('active'));
-                    e.target.classList.add('active');
-                    calculateBudget();
-                }
-            });
-
+            
+            daysInput?.addEventListener('input', calculateBudget);
+            
+            if (styleSelector) {
+                styleSelector.addEventListener('click', (e) => {
+                    if (e.target.tagName === 'BUTTON') {
+                        currentStyle = e.target.dataset.style;
+                        styleButtons.forEach(btn => {
+                            btn.classList.remove('active', 'btn-gradient', 'text-white');
+                            btn.classList.add('bg-gray-200', 'text-gray-800');
+                        });
+                        e.target.classList.add('active', 'btn-gradient', 'text-white');
+                        e.target.classList.remove('bg-gray-200', 'text-gray-800');
+                        calculateBudget();
+                    }
+                });
+            }
+            
+            if (styleButtons) {
+                 styleButtons.forEach(btn => {
+                    btn.className = 'budget-style-btn text-sm font-semibold py-2 px-4 rounded-lg transition-all duration-300';
+                    if(btn.classList.contains('active')) {
+                         btn.classList.add('btn-gradient', 'text-white');
+                    } else {
+                         btn.classList.add('bg-gray-200', 'text-gray-800');
+                    }
+                });
+            }
+           
             calculateBudget();
         });
-
-        function sortTable(tableId, column, type = 'str') {
-            const table = document.getElementById(tableId);
-            const tbody = table.querySelector('tbody');
-            const rows = Array.from(tbody.querySelectorAll('tr'));
-
-            const sortDir = table.dataset.sortDir === 'asc' ? 'desc' : 'asc';
-            table.dataset.sortDir = sortDir;
-            table.dataset.sortCol = column;
-
-            rows.sort((a, b) => {
-                let valA = a.children[column].textContent.trim();
-                let valB = b.children[column].textContent.trim();
-
-                if (type === 'num') {
-                    valA = parseFloat(valA.split(' ')[0]);
-                    valB = parseFloat(valB.split(' ')[0]);
-                }
-
-                if (valA < valB) { return sortDir === 'asc' ? -1 : 1; }
-                if (valA > valB) { return sortDir === 'asc' ? 1 : -1; }
-                return 0;
-            });
-
-            rows.forEach(row => tbody.appendChild(row));
-        }
     </script>
 </body>
 </html>
